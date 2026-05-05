@@ -12,18 +12,18 @@ The design is organised into three domains, all coordinated by a single **frame 
 ### Module Breakdown
 | Module | Role |
 | --- | --- |
-| `dk_top` | Top-level: instantiates all modules, routes signals, manages game state (lives,\\n score, win/lose) |
+| `dk_top` | Top-level: instantiates all modules, routes signals, manages<br/>game state (lives,\\n score, win/lose) |
 | `clk_div` | Divides 100 MHz → 25 MHz pixel clock |
 | `vga_sync (×2)` | Generates hpos, vpos, hsync, vsync, and frame_tick |
-| `scene_render` | Draws sloped girder platforms and ladders using bitwise arithmetic |
-| `info_bar` | Renders title text, score, and heart-shaped life icons in the top 100 px |
-| `gorilla` | Animated Donkey Kong sprite with a 4-state FSM (NORMAL → REACH → HOLD → THROW) |
-| `player` | Mario sprite with a 4-state FSM (WALK, CLIMB, FALL, DYING), gravity accumulator for jumps |
-| `barrels` | Manages a pool of 24 barrel_unit instances; spawns one barrel every 150 frames |
-| `barrel_unit` | Independent rolling barrel with bounding-box collision detection |
-| `dust` | 5-phase particle animation triggered on player or barrel landing |
+| `scene_render` | Draws sloped girder platforms and ladders using bitwise<br/>arithmetic |
+| `info_bar` | Renders title text, score, and heart-shaped life icons in<br/>the top 100 px |
+| `gorilla` | Animated Donkey Kong sprite with a 4-state<br/>FSM (NORMAL → REACH → HOLD → THROW) |
+| `player` | Mario sprite with a 4-state FSM (WALK, CLIMB, FALL, DYING),<br/>gravity accumulator for jumps |
+| `barrels` | Manages a pool of 24 barrel_unit instances; spawns one<br/>barrel every 150 frames |
+| `barrel_unit` | Independent rolling barrel with bounding-box<br/>collision detection |
+| `dust` | 5-phase particle animation triggered on player<br/>or barrel landing |
 | `blood` | 6-phase splatter animation on player–barrel collision |
-| `trophy` | Static win-objective sprite; triggers player_wins on bounding-box overlap |
-| `game_over_screen` | Centred "GAME OVER" overlay with dark background box |
+| `trophy` | Static win-objective sprite; triggers player_wins<br/>on bounding-box overlap |
+| `game_over_screen` | Centred "GAME OVER" overlay with dark<br/>background box |
 | `win_screen` | Centred "YOU WIN" overlay with dark background box |
 
