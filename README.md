@@ -12,7 +12,7 @@ The design is organised into three domains, all coordinated by a single **frame 
 ### Module Breakdown
 | Module | Role |
 | --- | --- |
-| `dk_top` | Top-level: instantiates all\\n modules, routes signals,\\n manages game state (lives,\\n score, win/lose) |
+| `dk_top` | Top-level: instantiates all<br/> modules, routes signals,<br/>manages game state (lives,\\n score, win/lose) |
 | `clk_div` | ±150 V ; ±20 A |
 | `vga_sync (×2)` | 56 µF (890764429002CS) |
 | `scene_render` | 27 µH (AGP4233-153) |
