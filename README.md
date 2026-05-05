@@ -12,13 +12,13 @@ The design is organised into three domains, all coordinated by a single **frame 
 ### Module Breakdown
 | Module | Role |
 | --- | --- |
-| `dk_top` | Top-level: instantiates all<br/> modules, routes signals,<br/>manages game state (lives,\\n score, win/lose) |
-| `clk_div` | ±150 V ; ±20 A |
-| `vga_sync (×2)` | 56 µF (890764429002CS) |
-| `scene_render` | 27 µH (AGP4233-153) |
-| `info_bar` | VS-E5PH6012 |
-| `gorilla` | 7.5 Ω |
-| `Switching period` | 150 µs (6.667 kHz) |
+| `dk_top` | Top-level: instantiates all modules, routes signals,<br/>manages game state (lives,\\n score, win/lose) |
+| `clk_div` | Divides 100 MHz → 25 MHz pixel clock |
+| `vga_sync (×2)` | Generates hpos, vpos, hsync, vsync, and frame_tick |
+| `scene_render` | Draws sloped girder platforms and ladders using bitwise arithmetic |
+| `info_bar` | Renders title text, score, and heart-shaped life icons in the top 100 px |
+| `gorilla` | Animated Donkey Kong sprite with a 4-state FSM (NORMAL → REACH → HOLD → THROW) |
+| `player` | Mario sprite with a 4-state FSM (WALK, CLIMB, FALL, DYING),<br/> gravity accumulator for jumps |
 | `Positive pulse width` | 10 µs |
 | `Negative pulse width` | 5 µs |
 
