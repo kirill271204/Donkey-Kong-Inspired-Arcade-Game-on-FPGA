@@ -12,18 +12,54 @@ The design is organised into three domains, all coordinated by a single **frame 
 ### Module Breakdown
 | Module | Role |
 | --- | --- |
-| `dk_top` | Top-level: instantiates all modules, routes signals, manages<br/>game state (lives,\\n score, win/lose) |
+| `dk_top` | Top-level: instantiates all modules, routes signals, manages game state (lives,\\n score, win/lose) |
 | `clk_div` | Divides 100 MHz → 25 MHz pixel clock |
 | `vga_sync (×2)` | Generates hpos, vpos, hsync, vsync, and frame_tick |
-| `scene_render` | Draws sloped girder platforms and ladders using bitwise<br/>arithmetic |
-| `info_bar` | Renders title text, score, and heart-shaped life icons in<br/>the top 100 px |
-| `gorilla` | Animated Donkey Kong sprite with a 4-state<br/>FSM (NORMAL → REACH → HOLD → THROW) |
-| `player` | Mario sprite with a 4-state FSM (WALK, CLIMB, FALL, DYING),<br/>gravity accumulator for jumps |
-| `barrels` | Manages a pool of 24 barrel_unit instances; spawns one<br/>barrel every 150 frames |
-| `barrel_unit` | Independent rolling barrel with bounding-box<br/>collision detection |
-| `dust` | 5-phase particle animation triggered on player<br/>or barrel landing |
+| `scene_render` | Draws sloped girder platforms and ladders using bitwise arithmetic |
+| `info_bar` | Renders title text, score, and heart-shaped life icons in the top 100 px |
+| `gorilla` | Animated Donkey Kong sprite with a 4-state FSM (NORMAL → REACH → HOLD → THROW) |
+| `player` | Mario sprite with a 4-state FSM (WALK, CLIMB, FALL, DYING), gravity accumulator for jumps |
+| `barrels` | Manages a pool of 24 barrel_unit instances; spawns one barrel every 150 frames |
+| `barrel_unit` | Independent rolling barrel with bounding-box collision detection |
+| `dust` | 5-phase particle animation triggered on player or barrel landing |
 | `blood` | 6-phase splatter animation on player–barrel collision |
-| `trophy` | Static win-objective sprite; triggers player_wins<br/>on bounding-box overlap |
-| `game_over_screen` | Centred "GAME OVER" overlay with dark<br/>background box |
+| `trophy` | Static win-objective sprite; triggers player_wins on bounding-box overlap |
+| `game_over_screen` | Centred "GAME OVER" overlay with dark background box |
 | `win_screen` | Centred "YOU WIN" overlay with dark background box |
 
+### Player Mechanics
+The player FSM governs all movement:
+- WALK: Left/right buttons move ±2 px per frame; vertical position snaps to the current floor.
+- JUMP: Centre button sets a negative vertical velocity; the FSM transitions to FALL.
+- FALL: A gravity accumulator (vy <= vy + 1) updates py each frame, producing a parabolic arc. Landing is detected when py re-enters a floor band.
+- CLIMB: When overlapping a ladder and pressing up/down, py changes by ±2 px per frame until the next floor is reached.
+- DYING: Triggered on barrel collision; decrements lives.
+
+### Barrel System
+- 24 independent barrel_unit instances managed by a parent barrels module.
+- A spawn counter fires every 150 frames, activating the lowest-indexed idle unit.
+- Each barrel rolls along sloped platforms independently.
+- Collision is checked per-unit via bounding-box overlap with the player.
+- Barrel speed is globally adjustable via SW[1:0] slide switches (difficulty control).
+
+### Rendering Approach
+All graphics are generated combinationally each pixel clock and no frame buffer is used:
+- Platforms are computed arithmetically: slopes via hpos >> 5, zigzag fill via lower bits of hpos.
+- Ladders use fixed coordinate ranges with rungs at vpos[2:0] == 0.
+- Sprites use 16×16 bitmap ROMs displayed at 2× scale (32×32 on screen), with separate colour masks for body parts.
+- Text uses an 8×8 font ROM displayed at 2× scale, indexed by a case-selected character ID.
+- Compositing is a priority multiplexer (blood > win screen > game over > player > trophy > barrels > gorilla > dust > info bar > scene).
+
+## Hardware
+- Board: Digilent Nexys 4 DDR (Artix-7 XC7A100T)
+- Display: 640×480 @ 60 Hz VGA
+- Inputs: 5 push buttons (movement + jump), 2 slide switches (difficulty)
+- Outputs: VGA RGB, 7-segment display (score + elapsed time), LEDs (player state)
+
+## Testing
+Three testbenches were developed in Vivado's behavioural simulator:
+- VGA Sync: Verifies hpos counts 0–799, vpos counts 0–524, and sync pulses fire at the correct intervals per the VESA 640×480 @ 60 Hz standard.
+- Player FSM: Confirms walk movement (±2 px/frame), jump parabola via gravity accumulator, and correct state transitions (WALK → FALL → landing → WALK).
+- Barrel Unit: Validates synchronous spawn activation, rolling movement, and bounding-box collision assertion/deassertion.
+
+To accelerate simulation, vpos and hpos were held at their frame_tick values (481, 0), allowing FSM updates every clock cycle instead of once per full VGA frame.
